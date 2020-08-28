@@ -45,42 +45,69 @@ Al iniciar sesión seguir los siguientes pasos:
 
 ### Paso 2. Capturar los datos de la petición
 
-Los siguientes datos a modificar se encuentran en **_test/Api/LAESimulacionApiTest.php_**
+Los siguientes datos a modificar se encuentran en **_test/Api/ApiTest.php_**
 
-Es importante contar con el setUp() que se encargará de inicializar la url. Modificar la URL **_('the_url')_** de la petición del objeto **_\$config_**, como se muestra en el siguiente fragmento de código:
+Es importante contar con el setUp() que se encargará de inicializar la petición. Por tanto, se debe modificar la URL (**url_API**); el usuario (**basic_auth_username**) y contraseña (**basic_auth_password**) de autenticación de acceso básica; y la API KEY (**x_api_key**), como se muestra en el siguiente fragmento de código:
 
 ```php
 public function setUp()
 {
-  $handler = \GuzzleHttp\HandlerStack::create();
-  $config = new \LAESimulacion\Client\Configuration();
-  $config->setHost('the_url');
+    $this->x_api_key = "your_api_key";
+    $this->basic_auth_username = "your-basic-auth-username";
+    $this->basic_auth_password = "your-basic-auth-password";
+    $this->url_API = "the_url";
 
-  $client = new \GuzzleHttp\Client(['handler' => $handler]);
-  $this->apiInstance = new LAEApi($client, $config);
+    //... code
+} 
+```
 
-  $this->x_api_key = "your_api_key";
-}
+Para la petición se deberá modificar el siguiente fragmento de código con los datos correspondientes:
 
+```php
 /**
-* Este es el método que se será ejecutado en la prueba ubicado en path/to/repository/test/Api/LAESimulacionApiTest.php
+* Este es el método que se será ejecutado en la prueba ubicado en path/to/repository/test/Api/ApiTest.php
 */
-public function testGetLAEByFolioConsulta()
+public function testConsultarTrayectorias()
 {
-  $request = new \LAESimulacion\Client\Model\PeticionFolioConsulta();
-  $segmento = new \LAESimulacion\Client\Model\CatalogoSegmento();
+    $request = new Busqueda();
+    $persona = new PersonaConsulta();
+    $domicilio = new DomicilioConsulta();
+    $catalogoSexoPersona = new CatalogoSexoPersona();
 
-  $request->setFolioOtorgante("1");
-  $request->setSegmento($segmento::PP);
-  $request->setFolioConsulta("386636538");
-  
-  try {
-    $result = $this->apiInstance->getLAEByFolioConsulta($this->x_api_key, $request);
-    $this->assertTrue($result!==null);
-    echo "testGetLAEByFolioConsulta\n";
-  } catch (Exception $e) {
-    echo 'Exception when calling LAE_SimulacionApi->getLAEByFolioConsulta: ', $e->getMessage(), PHP_EOL;
-  }
+    $persona->setPrimerNombre("Juan");
+    $persona->setApellidoPaterno("Pruebauno");
+    $persona->setApellidoMaterno("Pruebauno");
+    $persona->setFechaNacimiento("1966-12-07");
+    $persona->setSexo($catalogoSexoPersona::M);
+    
+    $domicilio->setDireccion("TORNO 301 EL ROSARIO");
+    $domicilio->setColonia("PEDREGAL DE SANTO DOMINGO");
+    $domicilio->setCp("02100");
+    
+    $request->setClaveEmpresaConsulta("2007310044");
+    $request->setFolioConsultaEmpleador("2620100");
+    $request->setProductoRequerido(4);
+    $request->setPuestoSolicitado("Vendedor");
+    $request->setPersona($persona);
+    $request->setDomicilio($domicilio);  
+
+    try {
+        $result = $this->apiInstance->consultarTrayectorias($this->x_api_key, $request);
+        print_r($result);
+        
+        if($this->apiInstance->getStatusCode() == 200){
+            print_r($result);
+        }
+
+        $this->assertTrue($this->apiInstance->getStatusCode() == 200);
+    } catch (ApiException $e) {
+
+        if($e->getCode() !== 204){
+            echo ' code. Exception when calling ApiTest->consultarTrayectorias: ', $e->getResponseBody(), PHP_EOL;
+        }
+    }
+    
+
 }
 ```
 
