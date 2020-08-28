@@ -20,3 +20,4 @@ Desktop.ini
 
 lib/Interceptor/*.p12
 lib/Interceptor/*.pem
+composer.lock
